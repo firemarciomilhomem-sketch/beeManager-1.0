@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BeeManager</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="layout">
+      <!-- MENU LATERAL -->
+      <aside class="sidebar">
+        <div class="logo">
+          <h2>🐝 BeeManager</h2>
+        </div>
+
+        <nav class="menu-lateral">
+          <a href="#" class="ativo"> 🏠 Dashboard </a>
+
+          <a href="#"> 📍 Apiários </a>
+
+          <a href="#"> 📦 Caixas </a>
+
+          <a href="#"> 🍯 Produção </a>
+
+          <a href="#"> 🚗 Visitas </a>
+
+          <a href="#"> 📊 Relatórios </a>
+
+          <a href="#"> ⚙️ Configurações </a>
+        </nav>
+
+        <button class="btn-sair">⏻ Sair</button>
+      </aside>
+
+      <!-- CONTEÚDO PRINCIPAL -->
+      <main class="conteudo">
+        <!-- TOPBAR -->
+        <div class="topbar">
+          <div class="topbar-logo">
+            <h4>🐝 BeeManager</h4>
+          </div>
+
+          <div class="topbar-centro">
+            <p id="mensagemUsuario">
+              🐝 Bem-vindo ao BeeManager! Gerencie seus apiários e acompanhe sua
+              produção.
+            </p>
+          </div>
+
+          <div class="topbar-acoes">
+            <a href="login.html" class="btn-login"> Entrar </a>
+
+            <a href="cadastro.html" class="btn-cadastro"> Criar Conta </a>
+          </div>
+        </div>
+
+        <!-- HEADER -->
+
+        <header>
+          <div class="header-info">
+            <h1>🐝 Central da Colmeia</h1>
+          </div>
+
+          <div class="header-descricao">
+            <h2>Seu universo apícola</h2>
+
+            <p>
+              Acompanhe seus apiários, gerencie suas caixas e acompanhe a
+              evolução da sua produção.
+            </p>
+          </div>
+        </header>
+
+        <!-- CARDS -->
+        <section class="resumo-dashboard">
+          <div class="card">
+            <h3>📍 Apiários</h3>
+
+            <p id="totalApiarios">0</p>
+          </div>
+
+          <div class="card">
+            <h3>📦 Caixas</h3>
+            <p id="totalCaixas">0</p>
+          </div>
+
+          <div class="card card-producao">
+            <h3>🍯 Produção</h3>
+
+            <div id="totalProducao" class="dados-producao">
+              <p>Mel: 0 kg</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>⚠️ Visitas Atrasadas</h3>
+
+            <p id="totalVisitasAtrasadas">0</p>
+
+            <small>Necessitam atenção</small>
+          </div>
+        </section>
+
+        <!-- AÇÕES -->
+        <section class="acoes">
+          <button onclick="abrirFormulario()">➕ Novo Apiário</button>
+
+          <button>📦 Nova Caixa</button>
+
+          <button>🍯 Registrar Produção</button>
+
+          <button>🚗 Nova Visita</button>
+        </section>
+
+        <section class="lista-apiarios">
+          <h2>📍 Meus Apiários</h2>
+
+          <div id="listaApiarios">
+            <p>Nenhum apiário cadastrado.</p>
+          </div>
+        </section>
+
+        <!-- RODAPÉ -->
+        <footer class="rodape">
+          <p>BeeManager © 2026 | Sistema de Gestão Apícola</p>
+        </footer>
+      </main>
+    </div>
+
+    <!-- MODAL NOVO APIÁRIO -->
+    <div id="formApiario" class="modal escondido">
+      <div class="card-formulario">
+        <button type="button" class="fechar-modal" onclick="fecharFormulario()">
+          ✕
+        </button>
+
+        <h2>Novo Apiário</h2>
+
+        <form id="novoApiario">
+          <label for="nomeApiario"> Nome do Apiário </label>
+
+          <input
+            type="text"
+            id="nomeApiario"
+            placeholder="Ex: Fazenda Sul"
+            required
+          />
+
+          <label for="endereco"> Endereço </label>
+
+          <input
+            type="text"
+            id="endereco"
+            placeholder="Ex: Zona Rural - Araguaçu"
+            required
+          />
+
+          <div class="botoes-formulario">
+            <button type="submit" class="salvar">Salvar</button>
+
+            <button type="button" class="cancelar" onclick="fecharFormulario()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="modalExcluir" class="modal escondido">
+      <div class="card-confirmacao">
+        <h3>Excluir Apiário</h3>
+
+        <p>Deseja realmente excluir este apiário?</p>
+
+        <div class="acoes-confirmacao">
+          <button class="btn-confirmar-excluir" onclick="confirmarExclusao()">
+            Excluir
+          </button>
+
+          <button class="btn-cancelar-excluir" onclick="fecharModalExcluir()">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
