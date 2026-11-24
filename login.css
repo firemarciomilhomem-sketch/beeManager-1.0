@@ -1,0 +1,306 @@
+
+/* =========================
+   CONFIGURAÇÕES GERAIS
+========================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(
+        135deg,
+        #FFF8E1,
+        #FFF3CD,
+        #FCE8B2
+    );
+
+    min-height: 100vh;
+}
+
+/* =========================
+   PÁGINA DE LOGIN
+========================= */
+
+.pagina-login {
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+}
+
+/* =========================
+   CARTÃO DE LOGIN
+========================= */
+
+.card-login {
+    width: 100%;
+    max-width: 420px;
+
+    background: #FFFFFF;
+
+    padding: 40px 35px;
+
+    border-radius: 20px;
+
+    box-shadow:
+        0 10px 35px rgba(93, 64, 55, 0.12);
+}
+
+/* =========================
+   LOGO
+========================= */
+
+.logo-login {
+    text-align: center;
+
+    margin-bottom: 30px;
+}
+
+.logo-login span {
+    font-size: 42px;
+}
+
+.logo-login h1 {
+    color: #5D4037;
+
+    font-size: 28px;
+
+    margin-top: 8px;
+}
+
+/* =========================
+   TÍTULO
+========================= */
+
+.titulo-login {
+    text-align: center;
+
+    margin-bottom: 30px;
+}
+
+.titulo-login h2 {
+    color: #5D4037;
+
+    font-size: 23px;
+
+    margin-bottom: 8px;
+}
+
+.titulo-login p {
+    color: #8D6E63;
+
+    font-size: 14px;
+}
+
+/* =========================
+   CAMPOS
+========================= */
+
+.campo-login {
+    margin-bottom: 20px;
+}
+
+.campo-login label {
+    display: block;
+
+    color: #5D4037;
+
+    font-weight: bold;
+
+    font-size: 14px;
+
+    margin-bottom: 8px;
+}
+
+.campo-login input {
+    width: 100%;
+
+    padding: 13px;
+
+    border: 1px solid #E0D5C8;
+
+    border-radius: 10px;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition: 0.3s;
+}
+
+.campo-login input:focus {
+    border-color: #D99A1E;
+
+    box-shadow:
+        0 0 0 3px rgba(217, 154, 30, 0.12);
+}
+
+/* =========================
+   BOTÃO ENTRAR
+========================= */
+
+.btn-entrar {
+    width: 100%;
+
+    padding: 14px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: linear-gradient(
+        135deg,
+        #FFD54F,
+        #F9A825
+    );
+
+    color: #5D4037;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+
+.btn-entrar:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 5px 15px rgba(217, 154, 30, 0.25);
+}
+
+/* =========================
+   CADASTRO
+========================= */
+
+.cadastro-login {
+    text-align: center;
+
+    margin-top: 25px;
+
+    font-size: 14px;
+
+    color: #8D6E63;
+}
+
+.cadastro-login a {
+    display: inline-block;
+
+    margin-top: 8px;
+
+    color: #B7791F;
+
+    font-weight: bold;
+
+    text-decoration: none;
+}
+
+.cadastro-login a:hover {
+    text-decoration: underline;
+}
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 480px) {
+
+    .card-login {
+        padding: 30px 22px;
+    }
+
+    .logo-login h1 {
+        font-size: 25px;
+    }
+
+    .titulo-login h2 {
+        font-size: 21px;
+    }
+
+}
+/* BOTÃO GOOGLE */
+
+.divisor-login {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin: 22px 0;
+
+    color: #8D6E63;
+    font-size: 12px;
+}
+
+.divisor-login::before,
+.divisor-login::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #E0D5C8;
+}
+
+.btn-google {
+    width: 100%;
+    padding: 13px;
+
+    background: white;
+
+    border: 1px solid #E0D5C8;
+    border-radius: 10px;
+
+    color: #5D4037;
+    font-size: 15px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+
+.btn-google:hover {
+    background: #FFF8E1;
+    border-color: #D99A1E;
+}
+
+.btn-google span {
+    margin-right: 8px;
+    color: #4285F4;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* MENSAGENS DOS FORMULÁRIOS */
+
+.mensagem-formulario {
+    display: none;
+    padding: 11px 14px;
+    margin: 12px 0;
+    border-radius: 8px;
+    font-size: 13px;
+    text-align: center;
+    line-height: 1.5;
+}
+
+.mensagem-formulario.erro {
+    display: block;
+    background: #fff0ee;
+    color: #b3261e;
+    border: 1px solid #f2c5c0;
+}
+
+.mensagem-formulario.sucesso {
+    display: block;
+    background: #edf7ed;
+    color: #2e7d32;
+    border: 1px solid #b7dfb9;
+}

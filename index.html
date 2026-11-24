@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BeeManager</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#d99a1e" />
   </head>
 
   <body>
@@ -18,17 +20,7 @@
         <nav class="menu-lateral">
           <a href="#" class="ativo"> 🏠 Dashboard </a>
 
-          <a href="#"> 📍 Apiários </a>
-
-          <a href="#"> 📦 Caixas </a>
-
-          <a href="#"> 🍯 Produção </a>
-
-          <a href="#"> 🚗 Visitas </a>
-
-          <a href="#"> 📊 Relatórios </a>
-
-          <a href="#"> ⚙️ Configurações </a>
+          <a href="#listaApiarios"> 📍 Apiários </a>
         </nav>
 
         <button class="btn-sair">⏻ Sair</button>
@@ -106,12 +98,6 @@
         <!-- AÇÕES -->
         <section class="acoes">
           <button onclick="abrirFormulario()">➕ Novo Apiário</button>
-
-          <button>📦 Nova Caixa</button>
-
-          <button>🍯 Registrar Produção</button>
-
-          <button>🚗 Nova Visita</button>
         </section>
 
         <section class="lista-apiarios">
@@ -185,6 +171,8 @@
         </div>
       </div>
     </div>
-    <script src="script.js"></script>
+
+    <script type="module" src="script.js"></script>
+    <script type="module" src="protecao.js"></script>
   </body>
 </html>

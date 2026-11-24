@@ -1,10 +1,30 @@
+
+import {
+    collection,
+    addDoc,
+    getDocs,
+    getDocsFromCache,
+    deleteDoc,
+    doc,
+    setDoc
+} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
+
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+
+import {
+  auth,
+  db
+} from "./firebase.js";
+
 // =================================
 // VARIÁVEIS
 // =================================
 
-let apiarios = JSON.parse(localStorage.getItem("apiarios")) || [];
-
+let apiarios = [];
 let apiarioParaExcluir = null;
+let usuarioAtual = null;
 
 // =================================
 // FORMULÁRIO APIÁRIO
@@ -34,20 +54,31 @@ function fecharModalExcluir() {
   document.getElementById("modalExcluir").classList.add("escondido");
 }
 
-function confirmarExclusao() {
-  apiarios = apiarios.filter((apiario) => apiario.id !== apiarioParaExcluir);
+// ATENÇÃO: A exclusão será migrada para o Firestore
+// na próxima etapa. Por enquanto, não testar esse botão.
 
-  localStorage.setItem("apiarios", JSON.stringify(apiarios));
+async function confirmarExclusao() {
+    if (!apiarioParaExcluir || !usuarioAtual) return;
 
-  renderizarApiarios();
+    try {
+        const referencia = doc(
+            db,
+            "usuarios",
+            usuarioAtual.uid,
+            "apiarios",
+            apiarioParaExcluir
+        );
 
-  atualizarProducaoTotal();
+        await deleteDoc(referencia);
 
-  atualizarTotalCaixas();
+        fecharModalExcluir();
 
-  atualizarVisitasAtrasadas();
+        await carregarApiarios(usuarioAtual.uid);
 
-  fecharModalExcluir();
+    } catch (erro) {
+        console.error("Erro ao excluir apiário:", erro);
+        alert("Não foi possível excluir o apiário.");
+    }
 }
 
 // =================================
@@ -99,40 +130,43 @@ function renderizarApiarios() {
 
   if (apiarios.length === 0) {
     lista.innerHTML = `
-            <p>Nenhum apiário cadastrado.</p>
-        `;
+      <p>Nenhum apiário cadastrado.</p>
+    `;
 
     atualizarCardApiarios();
-
     return;
   }
 
   apiarios.forEach((apiario) => {
     lista.innerHTML += `
-            <div
-                class="item-apiario"
-                onclick="abrirApiario(${apiario.id})">
+      <div
+        class="item-apiario"
+        onclick="abrirApiario('${apiario.id}')">
 
-                <button
-                    class="btn-excluir"
-                    onclick="event.stopPropagation(); excluirApiario(${apiario.id})">
+        <button
+          class="btn-excluir"
+          onclick="event.stopPropagation(); excluirApiario('${apiario.id}')">
 
-                    ✖
+          ✖
 
-                </button>
+        </button>
 
-                <h3>${apiario.nome}</h3>
+        <h3>${apiario.nome}</h3>
 
-                <p>
-                    📍 ${apiario.endereco}
-                </p>
+        <p>
+          📍 ${apiario.endereco}
+        </p>
 
-            </div>
-        `;
+      </div>
+    `;
   });
 
   atualizarCardApiarios();
 }
+
+// =================================
+// PRODUÇÃO TOTAL
+// =================================
 
 function atualizarProducaoTotal() {
   let totais = {
@@ -161,11 +195,11 @@ function atualizarProducaoTotal() {
 
   if (cardProducao) {
     cardProducao.innerHTML = `
-            <div>🍯 Mel: ${(totais.mel / 1000).toLocaleString("pt-BR")} kg</div>
-            <div>🌼 Pólen: ${totais.polen.toLocaleString("pt-BR")} g</div>
-            <div>🟤 Própolis: ${totais.propolis.toLocaleString("pt-BR")} g</div>
-            <div>💧 Apitoxina: ${totais.apitoxina.toLocaleString("pt-BR")} g</div>
-        `;
+      <div>🍯 Mel: ${(totais.mel / 1000).toLocaleString("pt-BR")} kg</div>
+      <div>🌼 Pólen: ${totais.polen.toLocaleString("pt-BR")} g</div>
+      <div>🟤 Própolis: ${totais.propolis.toLocaleString("pt-BR")} g</div>
+      <div>💧 Apitoxina: ${totais.apitoxina.toLocaleString("pt-BR")} g</div>
+    `;
   }
 }
 
@@ -173,43 +207,68 @@ function atualizarProducaoTotal() {
 // SALVAR NOVO APIÁRIO
 // =================================
 
+
 const formulario = document.getElementById("novoApiario");
 
 if (formulario) {
-  formulario.addEventListener("submit", function (event) {
+  formulario.addEventListener("submit", async function (event) {
     event.preventDefault();
 
-    const nome = document.getElementById("nomeApiario").value;
+    const usuario = usuarioAtual;
 
-    const endereco = document.getElementById("endereco").value;
+    if (!usuario) {
+      alert("Você precisa estar conectado para cadastrar um apiário.");
+      return;
+    }
+
+    const nome = document.getElementById("nomeApiario").value.trim();
+    const endereco = document.getElementById("endereco").value.trim();
 
     const novoApiario = {
-      id: Date.now(),
-
       nome: nome,
-
       endereco: endereco,
-
       caixas: [],
-
       ultimaVisita: null,
-
       intervaloInspecao: 30,
-
       dataCriacao: new Date().toISOString(),
     };
 
-    apiarios.push(novoApiario);
+    try {
+      const referenciaApiarios = collection(
+        db,
+        "usuarios",
+        usuario.uid,
+        "apiarios"
+      );
 
-    localStorage.setItem("apiarios", JSON.stringify(apiarios));
+      // Gera um ID imediatamente, sem esperar o servidor
+      const referenciaNovoApiario = doc(referenciaApiarios);
 
-    formulario.reset();
+      // Inicia a gravação no Firestore
+      const gravacao = setDoc(
+        referenciaNovoApiario,
+        novoApiario
+      );
 
-    fecharFormulario();
+      // Atualiza a interface imediatamente
+      formulario.reset();
+      fecharFormulario();
 
-    renderizarApiarios();
+      await carregarApiarios(usuario.uid);
+
+      // Acompanha a confirmação sem bloquear a interface
+      gravacao.catch((erro) => {
+        console.error("Erro ao sincronizar apiário:", erro);
+      });
+
+    } catch (erro) {
+      console.error("Erro ao cadastrar apiário:", erro);
+      alert("Não foi possível iniciar o cadastro do apiário.");
+    }
   });
 }
+
+
 // =================================
 // CONTADOR DE VISITAS ATRASADAS
 // =================================
@@ -233,13 +292,103 @@ function atualizarVisitasAtrasadas() {
 }
 
 // =================================
-// INICIALIZAÇÃO
+// BUSCAR APIÁRIOS DO FIRESTORE
 // =================================
 
-renderizarApiarios();
 
-atualizarProducaoTotal();
+async function carregarApiarios(uid) {
+  try {
+    const referenciaApiarios = collection(
+      db,
+      "usuarios",
+      uid,
+      "apiarios"
+    );
 
-atualizarVisitasAtrasadas();
+    let consulta;
 
-atualizarTotalCaixas();
+    if (navigator.onLine) {
+      try {
+        // Com internet: busca os dados atualizados
+        consulta = await getDocs(referenciaApiarios);
+
+      } catch (erroOnline) {
+        console.warn("Falha na consulta online. Tentando o cache...", erroOnline);
+
+        // Se falhar: tenta os dados armazenados localmente
+        consulta = await getDocsFromCache(referenciaApiarios);
+      }
+
+    } else {
+      // Sem internet: consulta diretamente o cache local
+      consulta = await getDocsFromCache(referenciaApiarios);
+    }
+
+    apiarios = consulta.docs.map((documento) => ({
+      id: documento.id,
+      ...documento.data()
+    }));
+
+    renderizarApiarios();
+    atualizarProducaoTotal();
+    atualizarVisitasAtrasadas();
+    atualizarTotalCaixas();
+
+    console.log("Apiários carregados:", apiarios.length);
+
+  } catch (erro) {
+    console.error("Erro ao carregar apiários:", erro);
+
+    alert(
+      "Não foi possível carregar os apiários. Verifique sua conexão ou se os dados estão armazenados no dispositivo."
+    );
+  }
+}
+
+
+// =================================
+// FUNÇÕES DISPONÍVEIS NO HTML
+// =================================
+
+window.abrirFormulario = abrirFormulario;
+window.fecharFormulario = fecharFormulario;
+window.excluirApiario = excluirApiario;
+window.fecharModalExcluir = fecharModalExcluir;
+window.confirmarExclusao = confirmarExclusao;
+window.abrirApiario = abrirApiario;
+
+// =================================
+// INICIALIZAÇÃO COM FIREBASE
+// =================================
+
+onAuthStateChanged(auth, (usuario) => {
+  if (!usuario) {
+    usuarioAtual = null;
+    apiarios = [];
+    return;
+  }
+
+  usuarioAtual = usuario;
+
+  carregarApiarios(usuario.uid);
+});
+
+
+// =================================
+// SERVICE WORKER - PWA
+// =================================
+
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", async () => {
+        try {
+            const registro = await navigator.serviceWorker.register(
+                "./service-worker.js"
+            );
+
+            console.log("BeeManager offline ativado!", registro);
+
+        } catch (erro) {
+            console.error("Erro ao registrar Service Worker:", erro);
+        }
+    });
+}

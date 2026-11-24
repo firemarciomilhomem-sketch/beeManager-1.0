@@ -1,178 +1,253 @@
-// =========================
-// OBTER ID DO APIÁRIO
-// =========================
+import {
+  doc,
+  getDoc,
+  getDocFromCache,
+  updateDoc,
+} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
 
-const dataVisita = document.getElementById("dataVisita");
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+
+import { auth, db } from "./firebase.js";
+
+// =================================
+// VARIÁVEIS
+// =================================
 
 const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
 
-const id = Number(params.get("id"));
-
-const apiarios = JSON.parse(localStorage.getItem("apiarios")) || [];
-
-const apiario = apiarios.find((a) => a.id === id);
+let usuarioAtual = null;
+let apiario = null;
 
 let caixaParaExcluir = null;
 let caixaEditando = null;
 let caixaColheita = null;
 
-// =========================
-// VALIDAR APIÁRIO
-// =========================
+const dataVisita = document.getElementById("dataVisita");
 
-if (!apiario) {
-  alert("Apiário não encontrado.");
+// =================================
+// REFERÊNCIA DO APIÁRIO NO FIRESTORE
+// =================================
 
-  window.location.href = "index.html";
+function referenciaApiario() {
+  return doc(db, "usuarios", usuarioAtual.uid, "apiarios", id);
 }
 
-// =========================
-// GARANTIR ESTRUTURA
-// =========================
+// =================================
+// SALVAR ALTERAÇÕES NO FIRESTORE
+// =================================
 
-if (!apiario.caixas) {
-  apiario.caixas = [];
-}
-if (!Array.isArray(apiario.visitas)) {
-  apiario.visitas = [];
-}
-
-if (!apiario.proximaVisita) {
-  apiario.proximaVisita = null;
-}
-apiario.caixas.forEach((caixa) => {
-  if (
-    !caixa.producao ||
-    typeof caixa.producao !== "object" ||
-    Array.isArray(caixa.producao)
-  ) {
-    caixa.producao = {
-      mel: 0,
-      polen: 0,
-      propolis: 0,
-      apitoxina: 0,
-    };
-  } else {
-    caixa.producao.mel = Number(caixa.producao.mel) || 0;
-
-    caixa.producao.polen = Number(caixa.producao.polen) || 0;
-
-    caixa.producao.propolis = Number(caixa.producao.propolis) || 0;
-
-    caixa.producao.apitoxina = Number(caixa.producao.apitoxina) || 0;
+async function salvarApiario() {
+  if (!usuarioAtual || !apiario) {
+    throw new Error("Apiário ou usuário não disponível.");
   }
 
-  caixa.producaoEmGramas = true;
-});
+  await updateDoc(referenciaApiario(), {
+    caixas: apiario.caixas,
+    visitas: apiario.visitas,
+    proximaVisita: apiario.proximaVisita,
+  });
+}
 
-localStorage.setItem("apiarios", JSON.stringify(apiarios));
+// =================================
+// CARREGAR APIÁRIO
+// =================================
 
-// =========================
-// EXIBIR DADOS
-// =========================
+async function carregarApiario() {
+  console.time("Carregamento do apiário");
 
-document.getElementById("nomeApiario").textContent = apiario.nome;
+  try {
+    if (!id) {
+      alert("ID do apiário não informado.");
+      window.location.href = "index.html";
+      return;
+    }
 
-document.getElementById("enderecoApiario").textContent = apiario.endereco;
+    const referencia = referenciaApiario();
+    let resultado;
 
-// =========================
+    // Sem internet: consulta diretamente o cache
+    if (!navigator.onLine) {
+      console.log("Carregando apiário pelo cache...");
+
+      resultado = await getDocFromCache(referencia);
+    } else {
+      // Com internet: consulta normalmente
+      resultado = await getDoc(referencia);
+    }
+
+    console.timeLog("Carregamento do apiário", "Documento obtido");
+
+    if (!resultado.exists()) {
+      alert("Apiário não encontrado.");
+      window.location.href = "index.html";
+      return;
+    }
+
+    apiario = {
+      id: resultado.id,
+      ...resultado.data(),
+    };
+
+    // Garantir estrutura dos dados
+    if (!Array.isArray(apiario.caixas)) {
+      apiario.caixas = [];
+    }
+
+    if (!Array.isArray(apiario.visitas)) {
+      apiario.visitas = [];
+    }
+
+    if (!apiario.proximaVisita) {
+      apiario.proximaVisita = null;
+    }
+
+    apiario.caixas.forEach((caixa) => {
+      if (
+        !caixa.producao ||
+        typeof caixa.producao !== "object" ||
+        Array.isArray(caixa.producao)
+      ) {
+        caixa.producao = {
+          mel: 0,
+          polen: 0,
+          propolis: 0,
+          apitoxina: 0,
+        };
+      } else {
+        caixa.producao.mel = Number(caixa.producao.mel) || 0;
+        caixa.producao.polen = Number(caixa.producao.polen) || 0;
+        caixa.producao.propolis = Number(caixa.producao.propolis) || 0;
+        caixa.producao.apitoxina = Number(caixa.producao.apitoxina) || 0;
+      }
+
+      if (!caixa.produz) {
+        caixa.produz = {
+          mel: false,
+          propolis: false,
+          polen: false,
+          apitoxina: false,
+        };
+      }
+    });
+
+    // Exibir dados do apiário
+    document.getElementById("nomeApiario").textContent = apiario.nome;
+    document.getElementById("enderecoApiario").textContent = apiario.endereco;
+
+    renderizarCaixas();
+
+    console.timeLog("Carregamento do apiário", "Caixas renderizadas");
+
+    atualizarProducaoApiario();
+    mostrarProximaVisita();
+
+    console.log("Apiário carregado com sucesso!");
+  } catch (erro) {
+    console.error("Erro ao carregar apiário:", erro);
+
+    if (!navigator.onLine) {
+      alert(
+        "Não foi possível encontrar os dados deste apiário no cache. Conecte-se à internet e abra-o novamente para armazená-los.",
+      );
+    } else {
+      alert("Não foi possível carregar os dados do apiário.");
+    }
+  } finally {
+    console.timeEnd("Carregamento do apiário");
+  }
+}
+
+// =================================
 // TEXTO STATUS
-// =========================
+// =================================
 
 function textoStatus(status) {
-  if (status === "forte") {
-    return "🐝 Forte";
-  }
-
-  if (status === "media") {
-    return "🟡 Média";
-  }
+  if (status === "forte") return "🐝 Forte";
+  if (status === "media") return "🟡 Média";
 
   return "🔴 Fraca";
 }
+
 function textoProduz(caixa) {
   const produtos = [];
 
   if (caixa.produz?.mel) produtos.push("Mel");
-
   if (caixa.produz?.propolis) produtos.push("Própolis");
-
   if (caixa.produz?.polen) produtos.push("Pólen");
-
   if (caixa.produz?.apitoxina) produtos.push("Apitoxina");
 
   return produtos.join(", ");
 }
 
-// =========================
+// =================================
 // RENDERIZAR CAIXAS
-// =========================
+// =================================
 
 function renderizarCaixas() {
   const lista = document.getElementById("listaCaixas");
-
   const totalCaixas = document.getElementById("totalCaixas");
 
-  totalCaixas.textContent = apiario.caixas.length;
+  if (!lista || !totalCaixas || !apiario) return;
 
+  totalCaixas.textContent = apiario.caixas.length;
   lista.innerHTML = "";
 
   if (apiario.caixas.length === 0) {
     lista.innerHTML = "<p>Nenhuma caixa cadastrada.</p>";
-
     return;
   }
 
   apiario.caixas.forEach((caixa) => {
     lista.innerHTML += `
-
             <div class="caixa">
-
-                <div class="acoes-caixa">
-
-                <button
-    class="btn-colheita"
-    onclick="abrirModalColheita(${caixa.id})">
-
-    🍯
-
-</button>
-
-    <button
-        class="btn-editar"
-        onclick="editarCaixa(${caixa.id})">
-
-        ✏️
-
-    </button>
-
-    <button
-        class="btn"
-        onclick="abrirModalExcluirCaixa(${caixa.id})">
-
-        ×
-
-    </button>
-
-</div>
-
-                <span class="status-caixa ${caixa.status}">
-                    ${textoStatus(caixa.status)}
-                </span>
 
                 <div class="topo">
 
-    <h2>${caixa.nome}</h2>
+                    <h2>${caixa.nome}</h2>
 
-</div>
+                    <div class="cabecalho-direita">
 
-<p class="produzindo">
+                        <div class="acoes-caixa">
 
-    🌿 Produzindo:
-    ${textoProduz(caixa)}
+                            <button
+                                class="btn-colheita"
+                                onclick="abrirModalColheita(${caixa.id})">
+                                🍯
+                            </button>
 
-</p>
- <div class="badges">
+                            <button
+                                class="btn-editar"
+                                onclick="editarCaixa(${caixa.id})">
+                                ✏️
+                            </button>
+
+                            <button
+                                class="btn"
+                                onclick="abrirModalExcluirCaixa(${caixa.id})">
+                                ×
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="linha-status">
+
+                    <p class="produzindo">
+                        🌿 Produzindo:
+                        ${textoProduz(caixa)}
+                    </p>
+
+                    <span class="status-caixa ${caixa.status}">
+                        Colmeia: ${textoStatus(caixa.status)}
+                    </span>
+
+                </div>
+
+                <div class="badges">
 
                     <span class="info melgueira">
                         📦 Melgueiras: ${caixa.melgueiras}
@@ -182,9 +257,10 @@ function renderizarCaixas() {
                         🥤 Alimentador:
                         ${caixa.alimentador ? "Sim" : "Não"}
                     </span>
+
                     <span class="info realeiras">
-    👑 Realeiras: ${caixa.realeiras || 0}
-</span>
+                        👑 Realeiras: ${caixa.realeiras || 0}
+                    </span>
 
                     <span class="info realeira">
                         👑 Rainha:
@@ -192,34 +268,37 @@ function renderizarCaixas() {
                     </span>
 
                     <div class="info producao">
-    🍯 Produção:
-    <div>
-        ${listarProducao(caixa)}
-    </div>
-</div>
+                        🍯 Produção:
+                        <div>
+                            ${listarProducao(caixa)}
+                        </div>
+                    </div>
 
                 </div>
 
             </div>
-
         `;
   });
 }
 
+// =================================
+// PRÓXIMA VISITA
+// =================================
+
 function mostrarProximaVisita() {
   const elemento = document.getElementById("dataProximaVisita");
 
+  if (!elemento || !apiario) return;
+
   if (apiario.proximaVisita) {
-    const dataFormatada = new Date(apiario.proximaVisita).toLocaleDateString(
-      "pt-BR",
-    );
+    const dataFormatada = new Date(
+      `${apiario.proximaVisita}T00:00:00`,
+    ).toLocaleDateString("pt-BR");
 
     const agora = new Date();
 
     const ano = agora.getFullYear();
-
     const mes = String(agora.getMonth() + 1).padStart(2, "0");
-
     const dia = String(agora.getDate()).padStart(2, "0");
 
     const hoje = `${ano}-${mes}-${dia}`;
@@ -236,9 +315,9 @@ function mostrarProximaVisita() {
   }
 }
 
-// =========================
+// =================================
 // MODAL NOVA CAIXA
-// =========================
+// =================================
 
 function abrirModalCaixa() {
   document.getElementById("modalCaixa").classList.remove("escondido");
@@ -248,15 +327,17 @@ function fecharModalCaixa() {
   document.getElementById("modalCaixa").classList.add("escondido");
 }
 
-// =========================
-// CADASTRAR NOVA CAIXA
-// =========================
+// =================================
+// CADASTRAR / EDITAR CAIXA
+// =================================
 
 const formNovaCaixa = document.getElementById("formNovaCaixa");
 
 if (formNovaCaixa) {
-  formNovaCaixa.addEventListener("submit", function (event) {
+  formNovaCaixa.addEventListener("submit", async function (event) {
     event.preventDefault();
+
+    if (!apiario) return;
 
     if (caixaEditando) {
       caixaEditando.nome = document.getElementById("nomeCaixa").value;
@@ -290,6 +371,7 @@ if (formNovaCaixa) {
         nome: document.getElementById("nomeCaixa").value,
 
         melgueiras: Number(document.getElementById("melgueiras").value),
+
         realeiras: Number(document.getElementById("realeiras").value) || 0,
 
         alimentador: document.getElementById("alimentador").value === "true",
@@ -309,11 +391,8 @@ if (formNovaCaixa) {
 
         produz: {
           mel: document.getElementById("prodMel").checked,
-
           propolis: document.getElementById("prodPropolis").checked,
-
           polen: document.getElementById("prodPolen").checked,
-
           apitoxina: document.getElementById("prodApitoxina").checked,
         },
       };
@@ -321,23 +400,36 @@ if (formNovaCaixa) {
       apiario.caixas.push(novaCaixa);
     }
 
-    localStorage.setItem("apiarios", JSON.stringify(apiarios));
+    try {
+      // Inicia a gravação sem bloquear a interface
+      const gravacao = salvarApiario();
 
-    formNovaCaixa.reset();
+      // Atualiza a tela imediatamente
+      formNovaCaixa.reset();
+      fecharModalCaixa();
 
-    fecharModalCaixa();
+      renderizarCaixas();
+      atualizarProducaoApiario();
 
-    renderizarCaixas();
+      // Acompanha possíveis erros de sincronização
+      gravacao.catch((erro) => {
+        console.error("Erro ao sincronizar caixa:", erro);
+      });
+    } catch (erro) {
+      console.error("Erro ao salvar caixa:", erro);
+      alert("Não foi possível iniciar o salvamento da caixa.");
+    }
   });
 }
-// =========================
-// MODAL COLHEITA
-// =========================
 
-function abrirModalColheita(id) {
-  caixaColheita = apiario.caixas.find((caixa) => caixa.id === id);
-  console.log("Caixa selecionada:", caixaColheita);
-  console.log("Produção:", caixaColheita.producao);
+// =================================
+// MODAL COLHEITA
+// =================================
+
+function abrirModalColheita(idCaixa) {
+  caixaColheita = apiario.caixas.find((caixa) => caixa.id === idCaixa);
+
+  if (!caixaColheita) return;
 
   document.getElementById("nomeCaixaColheita").textContent = caixaColheita.nome;
 
@@ -353,7 +445,7 @@ function abrirModalColheita(id) {
   ];
 
   produtos.forEach((produto) => {
-    if (caixaColheita.produz[produto.chave]) {
+    if (caixaColheita.produz?.[produto.chave]) {
       const opcao = document.createElement("option");
 
       opcao.value = produto.chave;
@@ -372,12 +464,14 @@ function fecharModalColheita() {
   document.getElementById("modalColheita").classList.add("escondido");
 }
 
-// =========================
+// =================================
 // MODAL EXCLUIR CAIXA
-// =========================
+// =================================
 
-function abrirModalExcluirCaixa(id) {
-  caixaParaExcluir = apiario.caixas.find((caixa) => caixa.id === id);
+function abrirModalExcluirCaixa(idCaixa) {
+  caixaParaExcluir = apiario.caixas.find((caixa) => caixa.id === idCaixa);
+
+  if (!caixaParaExcluir) return;
 
   document.getElementById("textoExcluirCaixa").textContent =
     `Deseja realmente excluir "${caixaParaExcluir.nome}"?`;
@@ -392,26 +486,39 @@ function fecharModalExcluirCaixa() {
 }
 
 function confirmarExclusaoCaixa() {
-  apiario.caixas = apiario.caixas.filter(
-    (caixa) => caixa.id !== caixaParaExcluir.id,
-  );
+  if (!caixaParaExcluir || !apiario) return;
 
-  localStorage.setItem("apiarios", JSON.stringify(apiarios));
+  const idExcluido = caixaParaExcluir.id;
 
-  fecharModalExcluirCaixa();
+  apiario.caixas = apiario.caixas.filter((caixa) => caixa.id !== idExcluido);
 
-  renderizarCaixas();
+  try {
+    const gravacao = salvarApiario();
 
-  atualizarProducaoApiario();
+    // Atualiza a interface imediatamente
+    fecharModalExcluirCaixa();
+
+    renderizarCaixas();
+    atualizarProducaoApiario();
+
+    // Observa possíveis erros de sincronização
+    gravacao.catch((erro) => {
+      console.error("Erro ao sincronizar exclusão:", erro);
+    });
+  } catch (erro) {
+    console.error("Erro ao excluir caixa:", erro);
+    alert("Não foi possível iniciar a exclusão da caixa.");
+  }
 }
-// =========================
+
+// =================================
 // SALVAR COLHEITA
-// =========================
+// =================================
 
 const formColheita = document.getElementById("formColheita");
 
 if (formColheita) {
-  formColheita.addEventListener("submit", function (event) {
+  formColheita.addEventListener("submit", async function (event) {
     event.preventDefault();
 
     const produto = document.getElementById("produtoColheita").value;
@@ -424,34 +531,44 @@ if (formColheita) {
       return;
     }
 
-    // Converte mel de Kg para gramas
     const quantidadeEmGramas =
       produto === "mel" ? quantidade * 1000 : quantidade;
 
-    // Soma no produto escolhido
     caixaColheita.producao[produto] += quantidadeEmGramas;
 
-    localStorage.setItem("apiarios", JSON.stringify(apiarios));
+    try {
+      // Inicia a gravação sem esperar o servidor
+      const gravacao = salvarApiario();
 
-    renderizarCaixas();
+      // Atualiza a interface imediatamente
+      renderizarCaixas();
+      atualizarProducaoApiario();
 
-    atualizarProducaoApiario();
+      formColheita.reset();
 
-    formColheita.reset();
+      document.getElementById("unidadeColheita").textContent = "Kg";
 
-    document.getElementById("unidadeColheita").textContent = "Kg";
+      fecharModalColheita();
 
-    fecharModalColheita();
+      // Acompanha possíveis erros de sincronização
+      gravacao.catch((erro) => {
+        console.error("Erro ao sincronizar colheita:", erro);
+      });
+    } catch (erro) {
+      console.error("Erro ao salvar colheita:", erro);
+      alert("Não foi possível iniciar o salvamento da colheita.");
+    }
   });
 }
 
-// =========================
-// INICIALIZAÇÃO
-// =========================
+// =================================
+// EDITAR CAIXA
+// =================================
 
-renderizarCaixas();
-function editarCaixa(id) {
-  caixaEditando = apiario.caixas.find((caixa) => caixa.id === id);
+function editarCaixa(idCaixa) {
+  caixaEditando = apiario.caixas.find((caixa) => caixa.id === idCaixa);
+
+  if (!caixaEditando) return;
 
   document.getElementById("nomeCaixa").value = caixaEditando.nome;
 
@@ -466,7 +583,6 @@ function editarCaixa(id) {
 
   document.getElementById("statusCaixa").value = caixaEditando.status;
 
-  // CHECKBOXES DE PRODUÇÃO
   document.getElementById("prodMel").checked =
     caixaEditando.produz?.mel || false;
 
@@ -482,9 +598,13 @@ function editarCaixa(id) {
   abrirModalCaixa();
 }
 
+// =================================
 // PRODUÇÃO
+// =================================
 
 function atualizarProducaoApiario() {
+  if (!apiario) return;
+
   let total = 0;
 
   apiario.caixas.forEach((caixa) => {
@@ -499,11 +619,8 @@ function textoProducao(caixa) {
   const produtos = [];
 
   if (caixa.produz?.mel) produtos.push("Mel");
-
   if (caixa.produz?.propolis) produtos.push("Própolis");
-
   if (caixa.produz?.polen) produtos.push("Pólen");
-
   if (caixa.produz?.apitoxina) produtos.push("Apitoxina");
 
   return produtos.join(", ");
@@ -534,46 +651,92 @@ function listarProducao(caixa) {
     .join("<br>");
 }
 
+// =================================
+// UNIDADE DA COLHEITA
+// =================================
+
 const produtoColheita = document.getElementById("produtoColheita");
 
-produtoColheita.addEventListener("change", function () {
-  const unidade = document.getElementById("unidadeColheita");
+if (produtoColheita) {
+  produtoColheita.addEventListener("change", function () {
+    const unidade = document.getElementById("unidadeColheita");
 
-  if (produtoColheita.value === "mel") {
-    unidade.textContent = "Kg";
-  } else {
-    unidade.textContent = "g";
-  }
-});
-// =========================
-// MODAL DE AGENDAR VISITA
-// =========================
+    unidade.textContent = produtoColheita.value === "mel" ? "Kg" : "g";
+  });
+}
+
+// =================================
+// MODAL AGENDAR VISITA
+// =================================
 
 function abrirModalVisita() {
   document.getElementById("modalVisita").classList.remove("escondido");
 }
+
 function fecharModalVisita() {
   document.getElementById("modalVisita").classList.add("escondido");
 }
 
-document
-  .getElementById("formVisita")
-  .addEventListener("submit", function (event) {
+const formVisita = document.getElementById("formVisita");
+
+if (formVisita) {
+  formVisita.addEventListener("submit", async function (event) {
     event.preventDefault();
+
+    if (!apiario) return;
 
     const dataEscolhida = dataVisita.value;
 
+    if (!dataEscolhida) return;
+
     apiario.proximaVisita = dataEscolhida;
 
-    localStorage.setItem("apiarios", JSON.stringify(apiarios));
+    try {
+      // Inicia a gravação sem esperar o servidor
+      const gravacao = salvarApiario();
 
-    fecharModalVisita();
+      // Atualiza a interface imediatamente
+      fecharModalVisita();
+      mostrarProximaVisita();
 
-    console.log(apiario);
+      // Acompanha possíveis erros de sincronização
+      gravacao.catch((erro) => {
+        console.error("Erro ao sincronizar visita:", erro);
+      });
+    } catch (erro) {
+      console.error("Erro ao agendar visita:", erro);
+      alert("Não foi possível iniciar o agendamento da visita.");
+    }
   });
+}
 
-renderizarCaixas();
+// =================================
+// FUNÇÕES DISPONÍVEIS NO HTML
+// =================================
 
-atualizarProducaoApiario();
+window.abrirModalCaixa = abrirModalCaixa;
+window.fecharModalCaixa = fecharModalCaixa;
+window.abrirModalColheita = abrirModalColheita;
+window.fecharModalColheita = fecharModalColheita;
+window.abrirModalExcluirCaixa = abrirModalExcluirCaixa;
+window.fecharModalExcluirCaixa = fecharModalExcluirCaixa;
+window.confirmarExclusaoCaixa = confirmarExclusaoCaixa;
+window.editarCaixa = editarCaixa;
+window.abrirModalVisita = abrirModalVisita;
+window.fecharModalVisita = fecharModalVisita;
 
-mostrarProximaVisita();
+console.time("Autenticação Firebase");
+
+onAuthStateChanged(auth, async (usuario) => {
+  console.timeLog("Autenticação Firebase", "Estado de autenticação recebido");
+
+  if (!usuario) {
+    usuarioAtual = null;
+    apiario = null;
+    return;
+  }
+
+  usuarioAtual = usuario;
+
+  await carregarApiario();
+});

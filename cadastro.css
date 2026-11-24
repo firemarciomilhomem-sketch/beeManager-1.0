@@ -1,0 +1,265 @@
+
+/* =========================
+   CONFIGURAÇÕES GERAIS
+========================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+
+    background: linear-gradient(
+        135deg,
+        #FFF8E1,
+        #FFF3CD,
+        #FCE8B2
+    );
+
+    min-height: 100vh;
+}
+
+
+/* =========================
+   PÁGINA DE CADASTRO
+========================= */
+
+.pagina-cadastro {
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+}
+
+
+/* =========================
+   CARTÃO
+========================= */
+
+.card-cadastro {
+    width: 100%;
+    max-width: 420px;
+
+    background: #FFFFFF;
+
+    padding: 35px;
+
+    border-radius: 20px;
+
+    box-shadow:
+        0 10px 35px rgba(93, 64, 55, 0.12);
+}
+
+
+/* =========================
+   LOGO
+========================= */
+
+.logo-cadastro {
+    text-align: center;
+
+    margin-bottom: 25px;
+}
+
+.logo-cadastro span {
+    font-size: 42px;
+}
+
+.logo-cadastro h1 {
+    color: #5D4037;
+
+    font-size: 28px;
+
+    margin-top: 8px;
+}
+
+
+/* =========================
+   TÍTULO
+========================= */
+
+.titulo-cadastro {
+    text-align: center;
+
+    margin-bottom: 25px;
+}
+
+.titulo-cadastro h2 {
+    color: #5D4037;
+
+    font-size: 23px;
+
+    margin-bottom: 8px;
+}
+
+.titulo-cadastro p {
+    color: #8D6E63;
+
+    font-size: 14px;
+}
+
+
+/* =========================
+   CAMPOS
+========================= */
+
+.campo-cadastro {
+    margin-bottom: 17px;
+}
+
+.campo-cadastro label {
+    display: block;
+
+    color: #5D4037;
+
+    font-weight: bold;
+
+    font-size: 14px;
+
+    margin-bottom: 8px;
+}
+
+.campo-cadastro input {
+    width: 100%;
+
+    padding: 13px;
+
+    border: 1px solid #E0D5C8;
+
+    border-radius: 10px;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition: 0.3s;
+}
+
+.campo-cadastro input:focus {
+    border-color: #D99A1E;
+
+    box-shadow:
+        0 0 0 3px rgba(217, 154, 30, 0.12);
+}
+
+
+/* =========================
+   BOTÃO CADASTRAR
+========================= */
+
+.btn-cadastrar {
+    width: 100%;
+
+    padding: 14px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: linear-gradient(
+        135deg,
+        #FFD54F,
+        #F9A825
+    );
+
+    color: #5D4037;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+
+.btn-cadastrar:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 5px 15px rgba(217, 154, 30, 0.25);
+}
+
+
+/* =========================
+   LINK LOGIN
+========================= */
+
+.login-cadastro {
+    text-align: center;
+
+    margin-top: 23px;
+
+    font-size: 14px;
+
+    color: #8D6E63;
+}
+
+.login-cadastro a {
+    display: inline-block;
+
+    margin-top: 8px;
+
+    color: #B7791F;
+
+    font-weight: bold;
+
+    text-decoration: none;
+}
+
+.login-cadastro a:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 480px) {
+
+    .card-cadastro {
+        padding: 28px 22px;
+    }
+
+    .logo-cadastro h1 {
+        font-size: 25px;
+    }
+
+    .titulo-cadastro h2 {
+        font-size: 21px;
+    }
+
+}
+
+/* MENSAGENS DOS FORMULÁRIOS */
+
+.mensagem-formulario {
+    display: none;
+    padding: 11px 14px;
+    margin: 12px 0;
+    border-radius: 8px;
+    font-size: 13px;
+    text-align: center;
+    line-height: 1.5;
+}
+
+.mensagem-formulario.erro {
+    display: block;
+    background: #fff0ee;
+    color: #b3261e;
+    border: 1px solid #f2c5c0;
+}
+
+.mensagem-formulario.sucesso {
+    display: block;
+    background: #edf7ed;
+    color: #2e7d32;
+    border: 1px solid #b7dfb9;
+}

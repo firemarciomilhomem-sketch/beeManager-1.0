@@ -1,0 +1,11 @@
+
+{
+  "name": "BeeManager",
+  "short_name": "BeeManager",
+  "description": "Sistema de Gestão Apícola",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fffaf0",
+  "theme_color": "#d99a1e",
+  "icons": []
+}

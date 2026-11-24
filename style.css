@@ -137,20 +137,20 @@ header{
    STATUS APIÁRIOS
 =================== */
 
-.status-caixa{
-    position:absolute;
-    left:10px;
-    top:10px;
 
-    padding:4px 10px;
+.status-caixa {
+    position: static;
 
-    border-radius:20px;
+    padding: 4px 10px;
 
-    font-size:12px;
-    font-weight:bold;
+    border-radius: 20px;
 
-    z-index:2;
+    font-size: 12px;
+    font-weight: bold;
+
+    white-space: nowrap;
 }
+
 
 
 
@@ -773,20 +773,40 @@ header{
     font-weight:bold;
 }
 
-.card-apiario{
 
-    background:white;
+.card-apiario {
+    background: white;
 
-    padding:25px;
+    max-width: 600px;
+    margin: 0 auto 15px;
 
-    border-radius:15px;
+    padding: 12px 18px;
 
-    margin-bottom:20px;
+    border-radius: 12px;
 
-    box-shadow:0 4px 12px rgba(0,0,0,.08);
+    box-shadow: 0 3px 10px rgba(0,0,0,.07);
+
+    text-align: center;
+}
+
+.card-apiario h1 {
+    font-size: 17px;
+    color: var(--marrom);
+
+    margin-bottom: 5px;
+}
+
+.card-apiario p {
+    font-size: 13px;
+    color: var(--marrom-claro);
+
+    margin: 0;
 }
 
 
+.lista-apiarios h2 {
+    text-align: center;
+}
 
 :root{
     --mel-claro: #FFF8E1;
@@ -843,12 +863,18 @@ body{
     box-shadow: 0 10px 20px rgba(0,0,0,.18);
 }
 
-.topo{
-    display: flex;
-    justify-content: center;
-    align-items: center;
 
-    height: 50px;
+.topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    gap: 12px;
+
+    min-height: 45px;
+    height: auto;
+
+    padding: 12px;
 
     background: linear-gradient(
         135deg,
@@ -856,6 +882,36 @@ body{
         #F9A825
     );
 }
+
+.topo h2 {
+    flex: 1;
+    min-width: 0;
+
+    font-size: 18px;
+    color: var(--marrom);
+
+    overflow-wrap: anywhere;
+}
+
+.cabecalho-direita {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+    gap: 8px;
+
+    flex-shrink: 0;
+}
+
+.acoes-caixa {
+    position: static;
+
+    display: flex;
+    gap: 6px;
+
+    z-index: 10;
+}
+
 
 h1{
     font-size: 20px;
@@ -1145,4 +1201,32 @@ select{
 .btn-sair:hover {
     background: #fbc02d;
     color: #3e2723;
+}
+
+.linha-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    flex-wrap: wrap;
+    gap: 8px;
+
+    padding: 0 15px;
+}
+
+.linha-status .produzindo {
+    margin: 8px 0;
+}
+
+.linha-status .status-caixa {
+    position: static;
+
+    padding: 4px 10px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+    font-weight: bold;
+
+    white-space: nowrap;
 }

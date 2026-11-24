@@ -1,301 +1,234 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Detalhes do Apiário</title>
 
-    <link rel="stylesheet" href="style.css">
-</head>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<body>
-
+  <body>
     <div class="conteudo-apiario">
+      <a href="index.html" class="btn-voltar"> ← Voltar </a>
 
-        <a href="index.html" class="btn-voltar">
-            ← Voltar
-        </a>
+      <div class="card-apiario">
+        <h1>
+          🐝 Apiário:
+          <span id="nomeApiario"></span>
+        </h1>
 
-        <div class="card-apiario">
+        <p>
+          📍 Endereço:
+          <span id="enderecoApiario"></span>
+        </p>
+      </div>
 
-            <h1 id="nomeApiario"></h1>
-
-            <p id="enderecoApiario"></p>
-
+      <section class="resumo-dashboard">
+        <div class="card">
+          <h3>📦 Caixas</h3>
+          <p id="totalCaixas">0</p>
         </div>
 
-        <section class="resumo-dashboard">
+        <div class="card">
+          <h3>🍯 Produção de Mel:</h3>
+          <p id="totalMel">0 Kg</p>
+        </div>
 
-            <div class="card">
-                <h3>📦 Caixas</h3>
-                <p id="totalCaixas">0</p>
-            </div>
+        <div class="card">
+          <h3>🚗 Visitas</h3>
+          <p id="totalVisitas">0</p>
+        </div>
+        <div class="card info-proxima-visita">
+          <h3>📅 Próxima visita</h3>
 
-            <div class="card">
-                <h3>🍯 Produção</h3>
-                <p id="totalMel">0 Kg</p>
-            </div>
+          <p id="dataProximaVisita">Nenhuma visita agendada.</p>
+        </div>
+      </section>
 
-            <div class="card">
-                <h3>🚗 Visitas</h3>
-                <p id="totalVisitas">0</p>
-            </div>
-            <div class=" card info-proxima-visita">
+      <section class="acoes">
+        <button onclick="abrirModalCaixa()">➕ Nova Caixa</button>
 
-                <h3>📅 Próxima visita</h3>
+        <button onclick="abrirModalVisita()">📅 Agendar Visita</button>
+      </section>
 
-                <p id="dataProximaVisita">
-                    Nenhuma visita agendada.
-                </p>
+      <section class="lista-apiarios">
+        <h2>📦 Caixas do Apiário</h2>
 
-            </div>
-
-        </section>
-
-        <section class="acoes">
-
-            <button onclick="abrirModalCaixa()">
-                ➕ Nova Caixa
-            </button>
-
-            <button onclick="abrirModalVisita()">
-                📅 Agendar Visita
-            </button>
-
-        </section>
-
-        <section class="lista-apiarios">
-
-            <h2>📦 Caixas do Apiário</h2>
-
-            <div id="listaCaixas" class="container">
-
-                <p>Nenhuma caixa cadastrada.</p>
-
-            </div>
-
-        </section>
-
+        <div id="listaCaixas" class="container">
+          <p>Nenhuma caixa cadastrada.</p>
+        </div>
+      </section>
     </div>
     <div id="modalCaixa" class="modal escondido">
+      <div class="card-formulario">
+        <button type="button" class="fechar-modal" onclick="fecharModalCaixa()">
+          ✕
+        </button>
 
-        <div class="card-formulario">
+        <h2>Nova Caixa</h2>
 
-            <button type="button" class="fechar-modal" onclick="fecharModalCaixa()">
+        <form id="formNovaCaixa">
+          <label>Nome da Caixa</label>
 
-                ✕
+          <input
+            type="text"
+            id="nomeCaixa"
+            placeholder="Ex: Caixa Velha"
+            required
+          />
 
+          <label>Melgueiras</label>
+
+          <input type="number" id="melgueiras" value="0" min="0" />
+
+          <label for="realeiras">Quantidade de realeiras:</label>
+          <input type="number" id="realeiras" min="0" value="0" />
+
+          <label>Produz:</label>
+
+          <div class="checkboxes-producao">
+            <label>
+              <input type="checkbox" id="prodMel" checked />
+              Mel
+            </label>
+
+            <label>
+              <input type="checkbox" id="prodPropolis" />
+              Própolis
+            </label>
+
+            <label>
+              <input type="checkbox" id="prodPolen" />
+              Pólen
+            </label>
+
+            <label>
+              <input type="checkbox" id="prodApitoxina" />
+              Apitoxina
+            </label>
+          </div>
+
+          <label>Status</label>
+
+          <select id="statusCaixa">
+            <option value="forte">Forte</option>
+
+            <option value="media">Média</option>
+
+            <option value="fraca">Fraca</option>
+          </select>
+          <label>Possui Alimentador?</label>
+
+          <select id="alimentador">
+            <option value="true">Sim</option>
+            <option value="false">Não</option>
+          </select>
+
+          <label>Rainha Presente?</label>
+
+          <select id="rainha">
+            <option value="true">Sim</option>
+            <option value="false">Não</option>
+          </select>
+
+          <div class="botoes-formulario">
+            <button type="submit" class="salvar">Salvar</button>
+
+            <button type="button" class="cancelar" onclick="fecharModalCaixa()">
+              Cancelar
             </button>
-
-            <h2>Nova Caixa</h2>
-
-            <form id="formNovaCaixa">
-
-                <label>Nome da Caixa</label>
-
-                <input type="text" id="nomeCaixa" placeholder="Ex: Caixa Velha" required>
-
-                <label>Melgueiras</label>
-
-                <input type="number" id="melgueiras" value="0" min="0">
-
-                <label for="realeiras">Quantidade de realeiras:</label>
-                <input type="number" id="realeiras" min="0" value="0">
-
-                <label>Produz:</label>
-
-                <div class="checkboxes-producao">
-
-                    <label>
-                        <input type="checkbox" id="prodMel" checked>
-                        Mel
-                    </label>
-
-                    <label>
-                        <input type="checkbox" id="prodPropolis">
-                        Própolis
-                    </label>
-
-                    <label>
-                        <input type="checkbox" id="prodPolen">
-                        Pólen
-                    </label>
-
-                    <label>
-                        <input type="checkbox" id="prodApitoxina">
-                        Apitoxina
-                    </label>
-
-                </div>
-
-                <label>Status</label>
-
-                <select id="statusCaixa">
-
-                    <option value="forte">
-                        Forte
-                    </option>
-
-                    <option value="media">
-                        Média
-                    </option>
-
-                    <option value="fraca">
-                        Fraca
-                    </option>
-
-                </select>
-                <label>Possui Alimentador?</label>
-
-                <select id="alimentador">
-                    <option value="true">Sim</option>
-                    <option value="false">Não</option>
-                </select>
-
-                <label>Rainha Presente?</label>
-
-
-
-
-                <select id="rainha">
-                    <option value="true">Sim</option>
-                    <option value="false">Não</option>
-                </select>
-
-                <div class="botoes-formulario">
-
-                    <button type="submit" class="salvar">
-
-                        Salvar
-
-                    </button>
-
-                    <button type="button" class="cancelar" onclick="fecharModalCaixa()">
-
-                        Cancelar
-
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-
+          </div>
+        </form>
+      </div>
     </div>
     <div id="modalExcluirCaixa" class="modal escondido">
+      <div class="card-confirmacao">
+        <h3>Excluir Caixa</h3>
 
-        <div class="card-confirmacao">
+        <p id="textoExcluirCaixa">Deseja realmente excluir esta caixa?</p>
 
-            <h3>Excluir Caixa</h3>
+        <div class="acoes-confirmacao">
+          <button
+            class="btn-confirmar-excluir"
+            onclick="confirmarExclusaoCaixa()"
+          >
+            Excluir
+          </button>
 
-            <p id="textoExcluirCaixa">
-                Deseja realmente excluir esta caixa?
-            </p>
-
-            <div class="acoes-confirmacao">
-
-                <button class="btn-confirmar-excluir" onclick="confirmarExclusaoCaixa()">
-
-                    Excluir
-
-                </button>
-
-                <button class="btn-cancelar-excluir" onclick="fecharModalExcluirCaixa()">
-
-                    Cancelar
-
-                </button>
-
-            </div>
-
+          <button
+            class="btn-cancelar-excluir"
+            onclick="fecharModalExcluirCaixa()"
+          >
+            Cancelar
+          </button>
         </div>
-
+      </div>
     </div>
-
 
     <!-- MODAL COLHEITA -->
 
     <div id="modalColheita" class="modal escondido">
+      <div class="card-formulario">
+        <h2>Registrar Colheita</h2>
 
-        <div class="card-formulario">
+        <p id="nomeCaixaColheita"></p>
 
-            <h2>Registrar Colheita</h2>
+        <form id="formColheita">
+          <label for="produtoColheita">Produto:</label>
 
-            <p id="nomeCaixaColheita"></p>
+          <select id="produtoColheita" required>
+            <option value="">Selecione o produto</option>
+          </select>
 
+          <label for="quantidadeColheita">
+            Quantidade (<span id="unidadeColheita">Kg</span>)
+          </label>
 
-            <form id="formColheita">
+          <input
+            type="number"
+            id="quantidadeColheita"
+            min="0.001"
+            step="any"
+            required
+          />
 
-                <label for="produtoColheita">Produto:</label>
+          <div class="botoes-formulario">
+            <button type="submit" class="salvar">Salvar</button>
 
-                <select id="produtoColheita" required>
-                    <option value="">Selecione o produto</option>
-                </select>
-
-                <label for="quantidadeColheita">
-                    Quantidade (<span id="unidadeColheita">Kg</span>)
-                </label>
-
-                <input type="number" id="quantidadeColheita" min="0.001" step="any" required>
-
-                <div class="botoes-formulario">
-
-                    <button type="submit" class="salvar">
-                        Salvar
-                    </button>
-
-                    <button type="button" class="cancelar" onclick="fecharModalColheita()">
-                        Cancelar
-                    </button>
-
-                </div>
-
-            </form>
-
-
-        </div>
-
+            <button
+              type="button"
+              class="cancelar"
+              onclick="fecharModalColheita()"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-
 
     <!-- MODAL AGENDAR VISITA -->
     <div id="modalVisita" class="modal escondido">
+      <div class="modal-conteudo">
+        <h2>Agendar Visita</h2>
 
-        <div class="modal-conteudo">
+        <form id="formVisita">
+          <label for="dataVisita"> Data da próxima visita: </label>
 
-            <h2>Agendar Visita</h2>
+          <input type="date" id="dataVisita" required />
 
-            <form id="formVisita">
+          <div class="botoes-modal">
+            <button type="submit">Salvar agendamento</button>
 
-                <label for="dataVisita">
-                    Data da próxima visita:
-                </label>
-
-                <input type="date" id="dataVisita" required>
-
-                <div class="botoes-modal">
-
-                    <button type="submit">
-                        Salvar agendamento
-                    </button>
-
-                    <button type="button" onclick="fecharModalVisita()">
-                        Cancelar
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-
+            <button type="button" onclick="fecharModalVisita()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-    <script src="apiario.js"></script>
-
-
-
-</body>
-
+    <script type="module" src="apiario.js"></script>
+    <script type="module" src="protecao.js"></script>
+  </body>
 </html>

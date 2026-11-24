@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Entrar | BeeManager</title>
+
+    <link rel="stylesheet" href="login.css" />
+  </head>
+
+  <body>
+    <main class="pagina-login">
+      <div class="card-login">
+        <!-- LOGO -->
+
+        <div class="logo-login">
+          <span>🐝</span>
+          <h1>BeeManager</h1>
+        </div>
+
+        <!-- TÍTULO -->
+
+        <div class="titulo-login">
+          <h2>Bem-vindo de volta!</h2>
+          <p>Entre para gerenciar seus apiários.</p>
+        </div>
+
+        <!-- LOGIN E-MAIL E SENHA -->
+
+        <form id="formLogin">
+          <div class="campo-login">
+            <label for="email">E-mail</label>
+
+            <input
+              type="email"
+              id="email"
+              placeholder="Digite seu e-mail"
+              required
+            />
+          </div>
+
+          <div class="campo-login">
+            <label for="senha">Senha</label>
+
+            <input
+              type="password"
+              id="senha"
+              placeholder="Digite sua senha"
+              required
+            />
+          </div>
+
+          <button type="submit" class="btn-entrar">Entrar</button>
+        </form>
+        <div
+          id="mensagemLogin"
+          class="mensagem-formulario"
+          role="status"
+          aria-live="polite"
+        ></div>
+
+        <!-- DIVISOR -->
+
+        <div class="divisor-login">
+          <span>OU</span>
+        </div>
+
+        <!-- LOGIN GOOGLE -->
+
+        <button type="button" id="btnGoogle" class="btn-google">
+          <span>G</span>
+          Continuar com Google
+        </button>
+
+        <!-- CADASTRO -->
+
+        <div class="cadastro-login">
+          <p>Ainda não tem uma conta?</p>
+
+          <a href="cadastro.html"> Criar minha conta </a>
+        </div>
+      </div>
+    </main>
+
+    <!-- JAVASCRIPT -->
+
+    <script type="module" src="login.js"></script>
+  </body>
+</html>
